@@ -1,0 +1,23 @@
+{
+  "name": "photo-cycler-webthing",
+  "version": "1.0.0",
+  "description": "Simple web thing that cycles through a photo directory, updating the current image periodically.",
+  "main": "photo-cycler-webthing.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mrstegeman/photo-cycler-webthing.git"
+  },
+  "author": "Michael Stegeman",
+  "license": "MPL-2.0",
+  "bugs": {
+    "url": "https://github.com/mrstegeman/photo-cycler-webthing/issues"
+  },
+  "homepage": "https://github.com/mrstegeman/photo-cycler-webthing#readme",
+  "dependencies": {
+    "mime-types": "^2.1.21",
+    "webthing": "^0.10.0"
+  }
+}

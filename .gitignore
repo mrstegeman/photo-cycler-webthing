@@ -1,6 +1,5 @@
 *.swp
 .DS_Store
 ._.DS_Store
-/lib/
 /photos/
 /static/

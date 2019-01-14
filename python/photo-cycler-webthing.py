@@ -8,7 +8,7 @@ import sys
 import tornado.ioloop
 import tornado.web
 
-_BASE_PATH = os.path.dirname(os.path.realpath(__file__))
+_BASE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')
 _PHOTOS_PATH = os.path.join(_BASE_PATH, 'photos')
 _STATIC_PATH = os.path.join(_BASE_PATH, 'static')
 
@@ -73,8 +73,12 @@ class PhotoCyclerThing(Thing):
 
     def cycle_image(self):
         """Update the current image."""
-        files = [p for p in os.listdir(_PHOTOS_PATH)
-                 if mimetypes.guess_type(p)[0] == 'image/jpeg']
+        files = [
+            p for p in os.listdir(_PHOTOS_PATH)
+            if mimetypes.guess_type(
+                os.path.join(_PHOTOS_PATH, p)
+            )[0] == 'image/jpeg'
+        ]
 
         if len(files) == 0:
             return
