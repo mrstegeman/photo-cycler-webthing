@@ -7,4 +7,4 @@ if [ ! -d node_modules ]; then
     npm install
 fi
 
-node photo-cycler-webthing.js
+node photo-cycler-webthing.js "${dir}/../photos" "${dir}/../static"

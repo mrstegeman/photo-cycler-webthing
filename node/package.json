@@ -18,6 +18,6 @@
   "homepage": "https://github.com/mrstegeman/photo-cycler-webthing#readme",
   "dependencies": {
     "mime-types": "^2.1.21",
-    "webthing": "^0.10.0"
+    "webthing": "^0.11.0"
   }
 }

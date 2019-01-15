@@ -7,4 +7,4 @@ if [ ! -d lib ]; then
     pip3 install --target lib -r requirements.txt --prefix ""
 fi
 
-PYTHONPATH=./lib python3 photo-cycler-webthing.py
+PYTHONPATH=./lib python3 photo-cycler-webthing.py "${dir}/../photos" "${dir}/../static"

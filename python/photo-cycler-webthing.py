@@ -8,18 +8,16 @@ import sys
 import tornado.ioloop
 import tornado.web
 
-_BASE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')
-_PHOTOS_PATH = os.path.join(_BASE_PATH, 'photos')
-_STATIC_PATH = os.path.join(_BASE_PATH, 'static')
-
 
 class PhotoCyclerThing(Thing):
     """Photo cycler web thing."""
 
-    def __init__(self):
+    def __init__(self, photos_path, static_path):
         """Initialize the thing."""
         Thing.__init__(self, 'Photo Cycler', [], 'Photo Cycler')
 
+        self.photos_path = photos_path
+        self.static_path = static_path
         self.update_rate = 5
 
         self.add_property(
@@ -53,9 +51,8 @@ class PhotoCyclerThing(Thing):
                          ],
                      }))
 
-        self.timer = tornado.ioloop.PeriodicCallback(self.cycle_image,
-                                                     self.update_rate * 1000)
-        self.timer.start()
+        self.timer = None
+        self.set_update_rate(self.update_rate)
 
     def set_update_rate(self, value):
         """
@@ -63,8 +60,10 @@ class PhotoCyclerThing(Thing):
 
         value -- new update rate
         """
+        if self.timer is not None:
+            self.timer.stop()
+
         self.update_rate = value
-        self.timer.stop()
         self.timer = tornado.ioloop.PeriodicCallback(
             self.cycle_image,
             self.update_rate * 1000
@@ -74,9 +73,9 @@ class PhotoCyclerThing(Thing):
     def cycle_image(self):
         """Update the current image."""
         files = [
-            p for p in os.listdir(_PHOTOS_PATH)
+            p for p in os.listdir(self.photos_path)
             if mimetypes.guess_type(
-                os.path.join(_PHOTOS_PATH, p)
+                os.path.join(self.photos_path, p)
             )[0] == 'image/jpeg'
         ]
 
@@ -84,43 +83,36 @@ class PhotoCyclerThing(Thing):
             return
 
         try:
-            link_path = os.path.join(_STATIC_PATH, 'current.jpg')
+            link_path = os.path.join(self.static_path, 'current.jpg')
 
             if os.path.exists(link_path):
                 os.unlink(link_path)
 
-            os.symlink(os.path.join(_PHOTOS_PATH, random.choice(files)),
+            os.symlink(os.path.join(self.photos_path, random.choice(files)),
                        link_path)
         except OSError as e:
             print(e)
 
 
-def run_server():
+def run_server(photos_path, static_path):
     """Create our photo cycler web thing and run the server."""
-    if not os.path.isdir(_PHOTOS_PATH):
-        try:
-            os.mkdir(_PHOTOS_PATH, 0o755)
-        except OSError as e:
-            print('Photos directory does not exist, failed to create:', e)
-            sys.exit(1)
+    if not os.path.isdir(photos_path):
+        print('Photos directory does not exist')
+        sys.exit(1)
 
-    if not os.path.isdir(_STATIC_PATH):
-        try:
-            os.mkdir(_STATIC_PATH, 0o755)
-        except OSError as e:
-            print('Static directory does not exist, failed to create:', e)
-            sys.exit(1)
+    if not os.path.isdir(static_path):
+        print('Static directory does not exist')
+        sys.exit(1)
 
-    thing = PhotoCyclerThing()
-    server = WebThingServer(SingleThing(thing), port=8888)
-
-    server.app.add_handlers(
-        r'.*',
-        [
+    thing = PhotoCyclerThing(photos_path, static_path)
+    server = WebThingServer(
+        SingleThing(thing),
+        port=8888,
+        additional_routes=[
             (
                 r'/static/(.*)',
                 tornado.web.StaticFileHandler,
-                {'path': _STATIC_PATH},
+                {'path': static_path},
             ),
         ]
     )
@@ -132,4 +124,8 @@ def run_server():
 
 
 if __name__ == '__main__':
-    run_server()
+    if len(sys.argv) < 3:
+        print('Usage: {} <photos_path> <static_path>'.format(sys.argv[0]))
+        sys.exit(1)
+
+    run_server(os.path.realpath(sys.argv[1]), os.path.realpath(sys.argv[2]))

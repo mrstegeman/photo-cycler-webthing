@@ -14,10 +14,6 @@ const fs = require('fs');
 const mime = require('mime-types');
 const path = require('path');
 
-const _BASE_PATH = path.normalize(path.join(__dirname, '..'));
-const _PHOTOS_PATH = path.join(_BASE_PATH, 'photos');
-const _STATIC_PATH = path.join(_BASE_PATH, 'static');
-
 /**
  * Photo cycler web thing.
  */
@@ -25,9 +21,11 @@ class PhotoCyclerThing extends Thing {
   /**
    * Initialize the thing.
    */
-  constructor() {
+  constructor(photosPath, staticPath) {
     super('Photo Cycler', [], 'Photo Cycler');
 
+    this.photosPath = photosPath;
+    this.staticPath = staticPath;
     this.updateRate = 5;
 
     this.addProperty(
@@ -67,7 +65,8 @@ class PhotoCyclerThing extends Thing {
       )
     );
 
-    this.timer = setInterval(this.cycleImage, this.updateRate * 1000);
+    this.timer = null;
+    this.setUpdateRate(this.updateRate);
   }
 
   /**
@@ -76,24 +75,30 @@ class PhotoCyclerThing extends Thing {
    * @param {number} value New update rate
    */
   setUpdateRate(value) {
+    if (this.timer) {
+      clearInterval(this.timer);
+    }
+
     this.updateRate = value;
-    clearInterval(this.timer);
-    this.timer = setInterval(this.cycleImage, this.updateRate * 1000);
+    this.timer = setInterval(
+      this.cycleImage.bind(this),
+      this.updateRate * 1000
+    );
   }
 
   /**
    * Update the current image.
    */
   cycleImage() {
-    const files = fs.readdirSync(_PHOTOS_PATH).filter((p) => {
-      return mime.lookup(path.join(_PHOTOS_PATH, p)) === 'image/jpeg';
+    const files = fs.readdirSync(this.photosPath).filter((p) => {
+      return mime.lookup(path.join(this.photosPath, p)) === 'image/jpeg';
     });
 
     if (files.length === 0) {
       return;
     }
 
-    const linkPath = path.join(_STATIC_PATH, 'current.jpg');
+    const linkPath = path.join(this.staticPath, 'current.jpg');
     const image = files[Math.floor(Math.random() * files.length)];
 
     try {
@@ -101,7 +106,7 @@ class PhotoCyclerThing extends Thing {
         fs.unlinkSync(linkPath);
       }
 
-      fs.symlinkSync(path.join(_PHOTOS_PATH, image), linkPath);
+      fs.symlinkSync(path.join(this.photosPath, image), linkPath);
     } catch (e) {
       console.error(e);
     }
@@ -111,29 +116,30 @@ class PhotoCyclerThing extends Thing {
 /**
  * Create our MPD Web Thing and run the server.
  */
-function runServer() {
-  if (!fs.existsSync(_PHOTOS_PATH)) {
-    try {
-      fs.mkdirSync(_PHOTOS_PATH, 0o755);
-    } catch (e) {
-      console.error('Photos directory does not exists, failed to create:', e);
-      process.exit(1);
-    }
+function runServer(photosPath, staticPath) {
+  if (!fs.existsSync(photosPath)) {
+    console.error('Photos directory does not exist');
+    process.exit(1);
   }
 
-  if (!fs.existsSync(_STATIC_PATH)) {
-    try {
-      fs.mkdirSync(_STATIC_PATH, 0o755);
-    } catch (e) {
-      console.error('Static directory does not exists, failed to create:', e);
-      process.exit(1);
-    }
+  if (!fs.existsSync(staticPath)) {
+    console.error('Static directory does not exist');
+    process.exit(1);
   }
 
-  const thing = new PhotoCyclerThing();
-  const server = new WebThingServer(new SingleThing(thing), 8888);
-
-  server.app.use('/static', express.static(_STATIC_PATH));
+  const thing = new PhotoCyclerThing(photosPath, staticPath);
+  const server = new WebThingServer(
+    new SingleThing(thing),
+    8888,
+    null,
+    null,
+    [
+      {
+        path: '/static',
+        handler: express.static(staticPath),
+      },
+    ]
+  );
 
   process.on('SIGINT', () => {
     server.stop();
@@ -143,4 +149,9 @@ function runServer() {
   server.start();
 }
 
-runServer();
+if (process.argv.length < 4) {
+  console.error(`Usage: node ${process.argv[0]} <photos_path> <static_path>`);
+  process.exit(1);
+}
+
+runServer(path.normalize(process.argv[2]), path.normalize(process.argv[3]));
