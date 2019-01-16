@@ -65,6 +65,8 @@ class PhotoCyclerThing extends Thing {
       )
     );
 
+    this.setUiHref('/static/index.html');
+
     this.timer = null;
     this.setUpdateRate(this.updateRate);
   }

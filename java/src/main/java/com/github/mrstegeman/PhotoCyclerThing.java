@@ -70,6 +70,8 @@ public class PhotoCyclerThing extends Thing {
                                       this.imageValue,
                                       imageMetadata));
 
+        this.setUiHref("/static/index.html");
+
         this.timer = null;
         this.setUpdateRate(this.updateRate);
     }

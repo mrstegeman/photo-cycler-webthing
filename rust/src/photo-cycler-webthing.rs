@@ -51,6 +51,8 @@ impl PhotoCyclerThing {
             Some("Photo Cycler".to_owned()),
         );
 
+        base.set_ui_href("/static/index.html".to_owned());
+
         let update_rate: Arc<RwLock<u64>> = Arc::new(RwLock::new(5));
 
         let update_rate_description = json!({

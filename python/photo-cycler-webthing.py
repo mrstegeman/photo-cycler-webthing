@@ -51,6 +51,8 @@ class PhotoCyclerThing(Thing):
                          ],
                      }))
 
+        self.set_ui_href('/static/index.html')
+
         self.timer = None
         self.set_update_rate(self.update_rate)
 
