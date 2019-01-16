@@ -25,11 +25,11 @@ class PhotoCyclerThing(Thing):
                      'updateRate',
                      Value(self.update_rate, self.set_update_rate),
                      metadata={
-                         'type': 'number',
+                         'type': 'integer',
                          'description': 'Photo cycle rate',
                          'minimum': 0,
                          'unit': 'second',
-                         'label': 'Update Rate',
+                         'title': 'Update Rate',
                      }))
 
         self.add_property(
@@ -40,7 +40,7 @@ class PhotoCyclerThing(Thing):
                          '@type': 'ImageProperty',
                          'type': 'null',
                          'description': 'Current image',
-                         'label': 'Image',
+                         'title': 'Image',
                          'readOnly': True,
                          'links': [
                              {

@@ -39,11 +39,11 @@ public class PhotoCyclerThing extends Thing {
         this.updateRate = 5;
 
         JSONObject updateRateMetadata = new JSONObject();
-        updateRateMetadata.put("type", "number");
+        updateRateMetadata.put("type", "integer");
         updateRateMetadata.put("description", "Photo cycle rate");
         updateRateMetadata.put("minimum", 0);
         updateRateMetadata.put("unit", "second");
-        updateRateMetadata.put("label", "Update Rate");
+        updateRateMetadata.put("title", "Update Rate");
         this.updateRateValue =
                 new Value(this.updateRate, v -> this.setUpdateRate((double)v));
         this.addProperty(new Property(this,
@@ -55,7 +55,7 @@ public class PhotoCyclerThing extends Thing {
         imageMetadata.put("@type", "ImageProperty");
         imageMetadata.put("type", "null");
         imageMetadata.put("description", "Current image");
-        imageMetadata.put("label", "Image");
+        imageMetadata.put("title", "Image");
         imageMetadata.put("readOnly", true);
         JSONArray imageLinks = new JSONArray();
         JSONObject imageLink = new JSONObject();
@@ -72,6 +72,69 @@ public class PhotoCyclerThing extends Thing {
 
         this.timer = null;
         this.setUpdateRate(this.updateRate);
+    }
+
+    /**
+     * Create our MPD Web Thing and run the server.
+     */
+    public static void main(String[] args) {
+        if (args.length < 2) {
+            System.err.println(
+                    "Usage: java -jar <jar_name> <photos_path> <static_path>");
+            System.exit(1);
+        }
+
+        File photosPath = new File(args[0]);
+        if (!photosPath.exists()) {
+            System.err.println("Photos directory does not exist");
+            System.exit(1);
+        }
+
+        File staticPath = new File(args[1]);
+        if (!staticPath.exists()) {
+            System.err.println("Static directory does not exist");
+            System.exit(1);
+        }
+
+        try {
+            WebThingServer.Route route =
+                    new WebThingServer.Route("/static/(.)+",
+                                             RouterNanoHTTPD.StaticPageHandler.class,
+                                             new Object[]{
+                                                     staticPath
+                                             });
+            PhotoCyclerThing thing =
+                    new PhotoCyclerThing(photosPath.getCanonicalPath(),
+                                         staticPath.getCanonicalPath());
+
+            WebThingServer server =
+                    new WebThingServer(new WebThingServer.SingleThing(thing),
+                                       8888,
+                                       null,
+                                       null,
+                                       Arrays.asList(route));
+
+            Runtime.getRuntime()
+                   .addShutdownHook(new Thread(() -> server.stop()));
+
+            server.start(false);
+        } catch (IOException e) {
+            System.out.println(e);
+            System.exit(1);
+        }
+    }
+
+    private void setUpdateRate(double value) {
+        if (this.timer != null) {
+            this.timer.cancel();
+        }
+
+        this.updateRate = value;
+        this.timer = new Timer();
+        this.timer.scheduleAtFixedRate(new CycleTask(this.photosPath,
+                                                     this.staticPath),
+                                       (long)this.updateRate * 1000,
+                                       (long)this.updateRate * 1000);
     }
 
     private class CycleTask extends TimerTask {
@@ -112,68 +175,6 @@ public class PhotoCyclerThing extends Thing {
             } catch (IOException e) {
                 System.err.println(e);
             }
-        }
-    }
-
-    private void setUpdateRate(double value) {
-        if (this.timer != null) {
-            this.timer.cancel();
-        }
-
-        this.updateRate = value;
-        this.timer = new Timer();
-        this.timer.scheduleAtFixedRate(new CycleTask(this.photosPath,
-                                                     this.staticPath),
-                                       (long)this.updateRate * 1000,
-                                       (long)this.updateRate * 1000);
-    }
-
-    /**
-     * Create our MPD Web Thing and run the server.
-     */
-    public static void main(String[] args) {
-        if (args.length < 2) {
-            System.err.println(
-                    "Usage: java -jar <jar_name> <photos_path> <static_path>");
-            System.exit(1);
-        }
-
-        File photosPath = new File(args[0]);
-        if (!photosPath.exists()) {
-            System.err.println("Photos directory does not exist");
-            System.exit(1);
-        }
-
-        File staticPath = new File(args[1]);
-        if (!staticPath.exists()) {
-            System.err.println("Static directory does not exist");
-            System.exit(1);
-        }
-
-        try {
-            WebThingServer.Route route = new WebThingServer.Route("/static/(.)+",
-                                                                  RouterNanoHTTPD.StaticPageHandler.class,
-                                                                  new Object[]{
-                                                                          staticPath
-                                                                  });
-            PhotoCyclerThing thing =
-                    new PhotoCyclerThing(photosPath.getCanonicalPath(),
-                                         staticPath.getCanonicalPath());
-
-            WebThingServer server =
-                    new WebThingServer(new WebThingServer.SingleThing(thing),
-                                       8888,
-                                       null,
-                                       null,
-                                       Arrays.asList(route));
-
-            Runtime.getRuntime()
-                   .addShutdownHook(new Thread(() -> server.stop()));
-
-            server.start(false);
-        } catch (IOException e) {
-            System.out.println(e);
-            System.exit(1);
         }
     }
 }

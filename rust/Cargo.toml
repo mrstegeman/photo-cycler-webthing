@@ -1,0 +1,14 @@
+[package]
+name = "photo-cycler-webthing"
+version = "1.0.0"
+authors = ["Michael Stegeman"]
+
+[dependencies]
+actix-web = { version = "0.7", default-features = false, features = ["brotli", "flate2-c", "cell"] }
+rand = "0.6"
+serde_json = "1.0"
+webthing = "0.11"
+
+[[bin]]
+name = "photo-cycler-webthing"
+path = "src/photo-cycler-webthing.rs"

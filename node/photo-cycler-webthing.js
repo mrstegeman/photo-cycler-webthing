@@ -34,11 +34,11 @@ class PhotoCyclerThing extends Thing {
         'updateRate',
         new Value(this.updateRate, this.setUpdateRate.bind(this)),
         {
-          type: 'number',
+          type: 'integer',
           description: 'Photo cycle rate',
           minimum: 0,
           unit: 'second',
-          label: 'Update Rate',
+          title: 'Update Rate',
         }
       )
     );
@@ -52,7 +52,7 @@ class PhotoCyclerThing extends Thing {
           '@type': 'ImageProperty',
           type: 'null',
           description: 'Current image',
-          label: 'Image',
+          title: 'Image',
           readOnly: true,
           links: [
             {
