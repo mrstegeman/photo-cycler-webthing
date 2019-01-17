@@ -1,6 +1,6 @@
 (function() {
-  const propertyHref = '/properties/updateRate';
-  const imageHref = 'current.jpg';
+  const propertyHref = `../properties/updateRate${document.location.search}`;
+  const imageHref = `current.jpg${document.location.search}`;
   let current = 1;
   let rate = null;
   let timer = null;

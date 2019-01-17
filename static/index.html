@@ -1,15 +1,27 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <title>Photo Cycler</title>
-        <link rel="stylesheet" type="text/css" href="main.css" />
-        <script type="application/javascript" src="main.js"></script>
-    </head>
-    <body>
-        <div id="frame">
-            <img id="image-1" class="transparent">
-            <img id="image-2">
-        </div>
-    </body>
+  <head>
+    <meta charset="utf-8">
+    <title>Photo Cycler</title>
+    <script type="application/javascript">
+      const head = document.querySelector('head');
+
+      const link = document.createElement('link');
+      link.href = `main.css${document.location.search}`;
+      link.type = 'text/css';
+      link.rel = 'stylesheet';
+      head.appendChild(link);
+
+      const script = document.createElement('script');
+      script.src = `main.js${document.location.search}`;
+      script.type = 'application/javascript';
+      head.appendChild(script);
+    </script>
+  </head>
+  <body>
+    <div id="frame">
+      <img id="image-1" class="transparent">
+      <img id="image-2">
+    </div>
+  </body>
 </html>
