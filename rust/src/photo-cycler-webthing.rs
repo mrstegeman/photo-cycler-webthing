@@ -46,6 +46,7 @@ struct PhotoCyclerThing {
 impl PhotoCyclerThing {
     fn new(photos_path: String, static_path: String) -> PhotoCyclerThing {
         let mut base = BaseThing::new(
+            "urn:dev:ops:photo-cycler".to_owned(),
             "Photo Cycler".to_owned(),
             Some(vec![]),
             Some("Photo Cycler".to_owned()),
@@ -181,8 +182,12 @@ impl Thing for PhotoCyclerThing {
         self.base.set_ui_href(href)
     }
 
-    fn get_name(&self) -> String {
-        self.base.get_name()
+    fn get_id(&self) -> String {
+        self.base.get_id()
+    }
+
+    fn get_title(&self) -> String {
+        self.base.get_title()
     }
 
     fn get_context(&self) -> String {
@@ -373,6 +378,7 @@ fn main() {
         None,
         Box::new(Generator),
         Some(Box::new(configure)),
+        None,
     );
     server.create();
     server.start();

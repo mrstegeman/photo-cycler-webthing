@@ -1,1 +1,1 @@
-webthing>=0.11.0
+webthing>=0.12.0

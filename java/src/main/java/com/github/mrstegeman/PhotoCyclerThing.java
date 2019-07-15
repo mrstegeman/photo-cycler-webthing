@@ -32,7 +32,10 @@ public class PhotoCyclerThing extends Thing {
      * Initialize the thing.
      */
     public PhotoCyclerThing(String photosPath, String staticPath) {
-        super("Photo Cycler", new JSONArray(), "Photo Cycler");
+        super("urn:dev:ops:photo-cycler",
+              "Photo Cycler",
+              new JSONArray(),
+              "Photo Cycler");
 
         this.photosPath = photosPath;
         this.staticPath = staticPath;

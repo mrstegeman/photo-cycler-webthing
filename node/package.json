@@ -4,7 +4,7 @@
   "description": "Simple web thing that cycles through a photo directory, updating the current image periodically.",
   "main": "photo-cycler-webthing.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "eslint ."
   },
   "repository": {
     "type": "git",
@@ -17,7 +17,11 @@
   },
   "homepage": "https://github.com/mrstegeman/photo-cycler-webthing#readme",
   "dependencies": {
-    "mime-types": "^2.1.21",
-    "webthing": "^0.11.0"
+    "mime-types": "^2.1.24",
+    "webthing": "^0.12.0"
+  },
+  "devDependencies": {
+    "babel-eslint": "^10.0.2",
+    "eslint": "^6.0.1"
   }
 }

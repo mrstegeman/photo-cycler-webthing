@@ -14,7 +14,13 @@ class PhotoCyclerThing(Thing):
 
     def __init__(self, photos_path, static_path):
         """Initialize the thing."""
-        Thing.__init__(self, 'Photo Cycler', [], 'Photo Cycler')
+        Thing.__init__(
+            self,
+            'urn:dev:ops:photo-cycler',
+            'Photo Cycler',
+            [],
+            'Photo Cycler'
+        )
 
         self.photos_path = photos_path
         self.static_path = static_path

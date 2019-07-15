@@ -22,7 +22,7 @@ class PhotoCyclerThing extends Thing {
    * Initialize the thing.
    */
   constructor(photosPath, staticPath) {
-    super('Photo Cycler', [], 'Photo Cycler');
+    super('urn:dev:ops:photo-cycler', 'Photo Cycler', [], 'Photo Cycler');
 
     this.photosPath = photosPath;
     this.staticPath = staticPath;

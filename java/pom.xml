@@ -59,7 +59,7 @@
         <dependency>
             <groupId>org.mozilla.iot</groupId>
             <artifactId>webthing</artifactId>
-            <version>0.11.0</version>
+            <version>0.12.0</version>
         </dependency>
     </dependencies>
 
