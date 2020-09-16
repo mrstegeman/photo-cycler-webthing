@@ -1,11 +1,8 @@
-extern crate actix_web;
-extern crate rand;
-#[macro_use]
-extern crate serde_json;
-extern crate webthing;
-
-use actix_web::{fs, App};
+use actix_files;
+use actix_rt;
+use actix_web::web;
 use rand::Rng;
+use serde_json::json;
 use std::any::Any;
 use std::env;
 use std::fs::DirEntry;
@@ -17,7 +14,7 @@ use std::{thread, time};
 use webthing::action::Action;
 use webthing::event::Event;
 use webthing::property::{BaseProperty, Property, ValueForwarder};
-use webthing::server::{ActionGenerator, AppState, ThingsType, WebThingServer};
+use webthing::server::{ActionGenerator, ThingsType, WebThingServer};
 use webthing::thing::{BaseThing, Thing};
 
 struct UpdateRateForwarder(Weak<RwLock<u64>>);
@@ -154,11 +151,11 @@ impl Thing for PhotoCyclerThing {
         self.base.as_thing_description()
     }
 
-    fn as_any(&self) -> &Any {
+    fn as_any(&self) -> &dyn Any {
         self
     }
 
-    fn as_mut_any(&mut self) -> &mut Any {
+    fn as_mut_any(&mut self) -> &mut dyn Any {
         self
     }
 
@@ -214,7 +211,7 @@ impl Thing for PhotoCyclerThing {
         self.base.get_event_descriptions(event_name)
     }
 
-    fn add_property(&mut self, property: Box<Property>) {
+    fn add_property(&mut self, property: Box<dyn Property>) {
         self.base.add_property(property)
     }
 
@@ -222,11 +219,11 @@ impl Thing for PhotoCyclerThing {
         self.base.remove_property(property_name)
     }
 
-    fn find_property(&mut self, property_name: String) -> Option<&mut Box<Property>> {
+    fn find_property(&mut self, property_name: &String) -> Option<&mut Box<dyn Property>> {
         self.base.find_property(property_name)
     }
 
-    fn get_property(&self, property_name: String) -> Option<serde_json::Value> {
+    fn get_property(&self, property_name: &String) -> Option<serde_json::Value> {
         self.base.get_property(property_name)
     }
 
@@ -234,7 +231,7 @@ impl Thing for PhotoCyclerThing {
         self.base.get_properties()
     }
 
-    fn has_property(&self, property_name: String) -> bool {
+    fn has_property(&self, property_name: &String) -> bool {
         self.base.has_property(property_name)
     }
 
@@ -242,11 +239,11 @@ impl Thing for PhotoCyclerThing {
         &self,
         action_name: String,
         action_id: String,
-    ) -> Option<Arc<RwLock<Box<Action>>>> {
+    ) -> Option<Arc<RwLock<Box<dyn Action>>>> {
         self.base.get_action(action_name, action_id)
     }
 
-    fn add_event(&mut self, event: Box<Event>) {
+    fn add_event(&mut self, event: Box<dyn Event>) {
         self.base.add_event(event)
     }
 
@@ -260,7 +257,7 @@ impl Thing for PhotoCyclerThing {
 
     fn add_action(
         &mut self,
-        action: Arc<RwLock<Box<Action>>>,
+        action: Arc<RwLock<Box<dyn Action>>>,
         input: Option<&serde_json::Value>,
     ) -> Result<(), &str> {
         self.base.add_action(action, input)
@@ -328,15 +325,16 @@ struct Generator;
 impl ActionGenerator for Generator {
     fn generate(
         &self,
-        _thing: Weak<RwLock<Box<Thing>>>,
+        _thing: Weak<RwLock<Box<dyn Thing>>>,
         _name: String,
         _input: Option<&serde_json::Value>,
-    ) -> Option<Box<Action>> {
+    ) -> Option<Box<dyn Action>> {
         None
     }
 }
 
-fn main() {
+#[actix_rt::main]
+async fn main() -> std::io::Result<()> {
     let args: Vec<_> = env::args().collect();
     if args.len() < 3 {
         eprintln!("Usage: {} <photos_path> <static_path>", args[0]);
@@ -357,18 +355,15 @@ fn main() {
     }
     let static_path = static_path.unwrap();
 
-    let thing: Arc<RwLock<Box<Thing + 'static>>> =
+    let thing: Arc<RwLock<Box<dyn Thing + 'static>>> =
         Arc::new(RwLock::new(Box::new(PhotoCyclerThing::new(
             photos_path.to_str().unwrap().to_string(),
             static_path.to_str().unwrap().to_string(),
         ))));
 
     let static_path = static_path.to_str().unwrap().to_string();
-    let configure = move |app: App<AppState>| {
-        app.handler(
-            "/static",
-            fs::StaticFiles::new(&static_path.clone()).unwrap(),
-        )
+    let configure = move |cfg: &mut web::ServiceConfig| {
+        cfg.service(actix_files::Files::new("/static", &static_path.clone()));
     };
 
     let mut server = WebThingServer::new(
@@ -377,9 +372,7 @@ fn main() {
         None,
         None,
         Box::new(Generator),
-        Some(Box::new(configure)),
         None,
     );
-    server.create();
-    server.start();
+    server.start(Some(Arc::new(configure))).await
 }
