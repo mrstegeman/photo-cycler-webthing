@@ -18,7 +18,7 @@ dependencies = [
  "libc",
  "log",
  "parking_lot 0.7.1",
- "smallvec 0.6.10",
+ "smallvec 0.6.14",
  "tokio 0.1.22",
  "tokio-codec",
  "tokio-executor",
@@ -719,7 +719,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0f0ed1a4de2235cabda8558ff5840bffb97fcb64c97827f354a451307df5f72b"
 dependencies = [
  "crossbeam-utils 0.6.5",
- "smallvec 0.6.10",
+ "smallvec 0.6.14",
 ]
 
 [[package]]
@@ -1590,7 +1590,7 @@ dependencies = [
  "libc",
  "rand 0.6.5",
  "rustc_version",
- "smallvec 0.6.10",
+ "smallvec 0.6.14",
  "winapi 0.3.9",
 ]
 
@@ -2166,9 +2166,12 @@ checksum = "c111b5bd5695e56cffe5129854aa230b39c93a305372fdbb2668ca2394eea9f8"
 
 [[package]]
 name = "smallvec"
-version = "0.6.10"
+version = "0.6.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ab606a9c5e214920bb66c458cd7be8ef094f813f20fe77a54cc7dbfff220d4b7"
+checksum = "b97fcaeba89edba30f044a10c6a3cc39df9c3f17d7cd829dd1446cab35f890e0"
+dependencies = [
+ "maybe-uninit",
+]
 
 [[package]]
 name = "smallvec"
@@ -2661,7 +2664,7 @@ dependencies = [
  "lazy_static",
  "log",
  "rand 0.5.6",
- "smallvec 0.6.10",
+ "smallvec 0.6.14",
  "socket2",
  "tokio-executor",
  "tokio-io",
@@ -2685,7 +2688,7 @@ dependencies = [
  "lazy_static",
  "log",
  "rand 0.5.6",
- "smallvec 0.6.10",
+ "smallvec 0.6.14",
  "socket2",
  "tokio-executor",
  "tokio-io",
@@ -2730,7 +2733,7 @@ dependencies = [
  "log",
  "lru-cache",
  "resolv-conf",
- "smallvec 0.6.10",
+ "smallvec 0.6.14",
  "tokio 0.1.22",
  "trust-dns-proto 0.6.3",
 ]
@@ -2791,7 +2794,7 @@ version = "0.1.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "141339a08b982d942be2ca06ff8b076563cbe223d1befd5450716790d44e2426"
 dependencies = [
- "smallvec 0.6.10",
+ "smallvec 0.6.14",
 ]
 
 [[package]]
